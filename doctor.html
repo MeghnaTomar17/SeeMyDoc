@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor Booking</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<!-- doctor.html -->
+<div class="container my-5">
+  <h3 class="mb-4">Book an Appointment with <span id="doctor-name">Doctor</span></h3>
+  <form id="booking-form" class="p-4 border rounded shadow-sm bg-light">
+
+    <div class="mb-3">
+      <label for="patient-name" class="form-label">Your Name</label>
+      <input type="text" class="form-control" id="patient-name" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="patient-age" class="form-label">Age</label>
+      <input type="number" class="form-control" id="patient-age" required>
+    </div>
+    
+    <div class="mb-3">
+      <label for="patient-gender" class="form-label">Gender</label>
+      <select id="patient-gender" class="form-select" required>
+        <option value="">Select</option>
+        <option value="Female">Female</option>
+        <option value="Male">Male</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    
+
+    <div class="mb-3">
+      <label for="appointment-date" class="form-label">Appointment Date</label>
+      <input type="date" class="form-control" id="appointment-date" required min="">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Consultation Mode</label><br>
+      <input type="radio" name="mode" value="Online" required> Online
+      <input type="radio" name="mode" value="In-Person" class="ms-3"> In-Person
+    </div>
+    <button type="submit" class="btn btn-success">Confirm Booking</button>
+
+  </form>
+</div>
+
+<script>
+  // Set today's date as minimum for appointment
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById("appointment-date").setAttribute("min", today);
+
+  const doctors = JSON.parse(localStorage.getItem("doctors") || "[]");
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const docId = urlParams.get("id");
+  const doc = doctors.find(d => d.id == docId);
+
+  if (doc) {
+    document.getElementById("doctor-name").innerText = doc.name;
+  }
+
+  document.getElementById("booking-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const patientName = document.getElementById("patient-name").value;
+    const appointmentDate = document.getElementById("appointment-date").value;
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+
+    const userToken = Math.floor(Math.random() * 30) + 21;
+    const currentToken = Math.floor(Math.random() * (userToken - 1)) + 1;
+    const eta = (userToken - currentToken) * 4;
+
+    const booking = {
+      docName: doc.name,
+      patientName,
+      appointmentDate,
+      mode,
+      userToken,
+      currentToken,
+      eta,
+    };
+
+    localStorage.setItem("booking", JSON.stringify(booking));
+    window.location.href = "confirmation.html";
+  });
+
+</script>

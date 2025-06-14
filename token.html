@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Live Token Status</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container my-5">
+    <h3 class="mb-4">Live Token Queue</h3>
+    <div id="token-status" class="alert alert-info p-4 fs-5"></div>
+    <a href="index.html" class="btn btn-secondary mt-3">Back to Home</a>
+  </div>
+
+<script>
+  function payFees() {
+  const amount = booking.feePaid || booking.docFees || 600;
+  document.getElementById("pay-amount").innerText = amount;
+  document.getElementById("qr-popup").classList.remove("d-none");
+
+  // Auto-close after 3 seconds and mark as paid
+  setTimeout(() => {
+    booking.paymentStatus = "Paid";
+    localStorage.setItem("booking", JSON.stringify(booking));
+    document.getElementById("qr-popup").classList.add("d-none");
+    alert("Payment successful ✅");
+    updateTokenStatus();
+  }, 3000);
+}
+
+
+
+  const booking = JSON.parse(localStorage.getItem("booking"));
+
+  if (booking) {
+    const appointmentDate = new Date(booking.appointmentDate);
+    const today = new Date();
+
+    // Remove time portion for accurate comparison
+    appointmentDate.setHours(0,0,0,0);
+    today.setHours(0,0,0,0);
+
+    if (appointmentDate.getTime() === today.getTime()) {
+      let userToken = booking.userToken;
+      let currentToken = booking.currentToken;
+
+      function updateTokenStatus() {
+  const remaining = userToken - currentToken;
+  const eta = remaining * 4;
+
+  const paidStatus = booking.paymentStatus === "Paid";
+
+  document.getElementById("token-status").innerHTML = `
+    <p><strong>Your Token:</strong> #${userToken}</p>
+    <p><strong>Current Token:</strong> #${currentToken}</p>
+    <p><strong>People Ahead:</strong> ${remaining}</p>
+    <p><strong>Estimated Wait Time:</strong> ${eta} minutes</p>
+    <p><strong>Payment Status:</strong> ${paidStatus ? "✅ Paid" : "❌ Not Paid"}</p>
+    ${
+      !paidStatus
+        ? `<button class="btn btn-warning mt-2" onclick="payFees()">💳 Pay Now</button>`
+        : ""
+    }
+  `;
+
+  if (remaining > 0) currentToken++;
+}
+
+
+      updateTokenStatus();
+      setInterval(updateTokenStatus, 60000); // update every 1 min
+
+    } else {
+      document.getElementById("token-status").innerHTML = `
+        <div class="alert alert-warning">
+          Live token status becomes visible only on the day of your appointment.<br>
+          Your appointment is scheduled for <strong>${booking.appointmentDate}</strong>.
+        </div>
+      `;
+    }
+
+  } else {
+    document.getElementById("token-status").innerHTML = `
+      <div class="text-danger">No active booking found.</div>
+    `;
+  }
+</script>
+
+<!-- Dummy QR Popup -->
+<div id="qr-popup" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-75 d-none">
+  <div class="bg-white p-4 rounded shadow text-center">
+    <h5>Scan to Pay ₹<span id="pay-amount">amount</span></h5>
+    <img src="https://api.qrserver.com/v1/create-qr-code/?data=upi://pay&size=200x200" alt="QR Code" class="img-fluid my-3" style="width: 200px;">
+    <p class="text-muted">Auto-confirming in 3 seconds...</p>
+  </div>
+</div>
+
+</body>
+</html>

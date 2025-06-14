@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container my-5">
+    <h3 class="mb-4">👤 My Profile</h3>
+
+    <div id="profile-container"></div>
+
+    <div class="mt-4">
+      <a href="index.html" class="btn btn-secondary me-2">🏠 Back to Home</a>
+      <a href="token.html" class="btn btn-success me-2">🎫 View Live Token Status</a>
+    </div>
+  </div>
+
+  <script>
+    const container = document.getElementById("profile-container");
+    const savedProfile = JSON.parse(localStorage.getItem("userProfile"));
+
+    if (savedProfile) {
+      // Show saved profile
+      container.innerHTML = `
+        <div class="alert alert-light border p-4 fs-5">
+          <p><strong>Name:</strong> ${savedProfile.name}</p>
+          <p><strong>Age:</strong> ${savedProfile.age}</p>
+          <p><strong>Gender:</strong> ${savedProfile.gender}</p>
+          <p><strong>Blood Group:</strong> ${savedProfile.bloodGroup}</p>
+          <p><strong>Existing Conditions:</strong> ${savedProfile.conditions || 'None reported'}</p>
+          <p><strong>Allergies:</strong> ${savedProfile.allergies || 'None reported'}</p>
+          <button class="btn btn-outline-danger mt-3" onclick="deleteProfile()">🗑️ Delete Profile</button>
+        </div>
+      `;
+    } else {
+      // Show profile creation form
+      container.innerHTML = `
+        <form id="create-profile" class="border p-4 bg-light rounded shadow-sm">
+          <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="age" class="form-label">Age</label>
+            <input type="number" class="form-control" id="age" required>
+          </div>
+          <div class="mb-3">
+            <label for="gender" class="form-label">Gender</label>
+            <select class="form-select" id="gender" required>
+              <option value="">Select</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="bloodGroup" class="form-label">Blood Group</label>
+            <input type="text" class="form-control" id="bloodGroup" required>
+          </div>
+          <div class="mb-3">
+            <label for="conditions" class="form-label">Existing Medical Conditions</label>
+            <textarea class="form-control" id="conditions" placeholder="e.g. Diabetes, Hypertension"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="allergies" class="form-label">Allergies</label>
+            <textarea class="form-control" id="allergies" placeholder="e.g. Penicillin, Peanuts"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">💾 Save Profile</button>
+        </form>
+      `;
+
+      // Handle form submission
+      document.getElementById("create-profile").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const profile = {
+          name: document.getElementById("name").value,
+          age: document.getElementById("age").value,
+          gender: document.getElementById("gender").value,
+          bloodGroup: document.getElementById("bloodGroup").value,
+          conditions: document.getElementById("conditions").value,
+          allergies: document.getElementById("allergies").value
+        };
+        localStorage.setItem("userProfile", JSON.stringify(profile));
+        location.reload(); // Refresh to show saved profile
+      });
+    }
+
+    function deleteProfile() {
+      localStorage.removeItem("userProfile");
+      location.reload();
+    }
+  </script>
+</body>
+</html>
